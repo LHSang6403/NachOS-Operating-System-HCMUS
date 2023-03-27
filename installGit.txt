@@ -1,3 +1,5 @@
-Working with GIT: https://www.atlassian.com/git/tutorials/setting-up-a-repository
 Install GIT on Ubuntu 16.04 LTS: https://www.liquidweb.com/kb/install-git-ubuntu-16-04-lts/ 
+Working with GIT: https://www.atlassian.com/git/tutorials/setting-up-a-repository
+GIT Token, because we cannot authen GIT on Ubuntu by our password, let create your token and fill in password
+
 Sang.
