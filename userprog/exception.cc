@@ -117,6 +117,51 @@ void ExceptionHandler(ExceptionType which)
 	case NoException:
 		return;
 
+	case NoException:
+    return;
+
+    case PageFaultException:
+        DEBUG('a', "\n No valid translation found"); // debug
+        printf("\n\n No valid translation found"); // run time
+        interrupt->Halt(); // close os
+        break;
+
+    case ReadOnlyException:
+        DEBUG('a', "\n Write attempted to page marked \"read-only\"");
+        printf("\n\n Write attempted to page marked \"read-only\"");
+        interrupt->Halt();
+        break;
+
+    case BusErrorException:
+        DEBUG('a', "\n Translation resulted in an invalid physical address");
+        printf("\n\n Translation resulted in an  invalid physical address");
+        interrupt->Halt();
+        break;
+
+    case AddressErrorException:
+        DEBUG('a', "\n Unaligned reference or one that was beyond the end of the address space");
+        printf("\n\n Unaligned reference or one that was beyond the end of the address space");
+        interrupt->Halt();
+        break;
+
+    case OverflowException:
+        DEBUG('a', "\n Integer overflow in add or sub");
+        printf("\n\n Integer overflow in add or sub");
+        interrupt->Halt();
+        break;
+
+    case IllegalInstrException:
+        DEBUG('a', "\n Unimplemented or reserved instr");
+        printf("\n\n Unimplemented or reserved instr");
+        interrupt->Halt();
+        break;
+
+    case NumExceptionTypes:
+        DEBUG('a', "\n Num Exception Types");
+        printf("\n\n Num Exception Types");
+        interrupt->Halt();
+        break;
+
 	case SyscallException:
 		switch (type)
 		{

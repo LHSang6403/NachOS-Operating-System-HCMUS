@@ -42,11 +42,13 @@ start.o: start.s ../userprog/syscall.h
 	$(AS) $(ASFLAGS) -o start.o strt.s
 	rm strt.s
 
-halt.o: halt.c
+halt.o: halt.c # compile halt.c to halt.o
 	$(CC) $(CFLAGS) -c halt.c
-halt: halt.o start.o
-	$(LD) $(LDFLAGS) start.o halt.o -o halt.coff
-	../bin/coff2noff halt.coff halt
+halt: halt.o start.o # link halt.o with start.o, then make executable file: halt
+	$(LD) $(LDFLAGS) start.o halt.o -o halt.coff 
+	../bin/coff2noff halt.coff halt 
+# make halt.coff (run on linux) form start.o and halt.o
+# use coff2noff in bin folder to build halt.noff -> executable file on nachos
 
 shell.o: shell.c
 	$(CC) $(CFLAGS) -c shell.c
