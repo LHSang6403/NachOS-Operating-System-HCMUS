@@ -118,9 +118,6 @@ void ExceptionHandler(ExceptionType which)
 	case NoException:
 		return;
 
-	case NoException:
-    	return;
-
     case PageFaultException:
         DEBUG('a', "\n No valid translation found"); // debug
         printf("\n\n No valid translation found"); // run time
