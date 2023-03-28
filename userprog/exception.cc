@@ -50,19 +50,19 @@
 //	are in machine.h.
 //----------------------------------------------------------------------
 
-void inc_program_counter()
+void inc_program_counter() // PrevPC = CurrPC; CurrPC = NextPC; NextPC + 4
 {
 	/* set previous programm counter (debugging only)
      * similar to: registers[PrevPCReg] = registers[PCReg];*/
-	machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
+	machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg)); // PCReg: current Programm counter, then write this to the previous PC
 
 	/* set programm counter to next instruction
      * similar to: registers[PCReg] = registers[NextPCReg]*/
-	machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
+	machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg)); // get value of the next PC, then write it to the current PC
 
 	/* set next programm counter for brach execution
      * similar to: registers[NextPCReg] = pcAfter;*/
-	machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg) + 4);
+	machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg) + 4); // write the next 4 bytes to the next PC
 }
 
 char *User2System(int virtAddr, int limit)
@@ -108,6 +108,7 @@ int System2User(int virtAddr, int len, char *buffer)
 	} while (i < len && oneChar != 0);
 	return i;
 }
+
 void ExceptionHandler(ExceptionType which)
 {
 	int type = machine->ReadRegister(2);
@@ -118,7 +119,7 @@ void ExceptionHandler(ExceptionType which)
 		return;
 
 	case NoException:
-    return;
+    	return;
 
     case PageFaultException:
         DEBUG('a', "\n No valid translation found"); // debug
@@ -165,83 +166,83 @@ void ExceptionHandler(ExceptionType which)
 	case SyscallException:
 		switch (type)
 		{
-		case SC_Halt:
-			DEBUG('a', "\n Shutdown, initiated by user program.");
-			printf("\n\n Shutdown, initiated by user program.");
-			interrupt->Halt();
-			break;
-		case SC_Print:
-		{
-			int virtAddr = machine->ReadRegister(4);
-			char *temp = new char[MaxLength];
-			//memset(temp, 0, MaxLength);
-			temp = User2System(virtAddr, MaxLength);
-			int i = 0;
-			while (temp[i] != 0)
-			{
-				synchConsole->Write(temp + i, 1);
-				i++;
-			}
-			temp[i] = '\n';
-			synchConsole->Write(temp + i, 1);
-			delete[] temp;
-			break;
-		}
-		case SC_Create:
-		{
-			int virtAddr;
-			char *filename;
-			DEBUG('a', "\n SC_Create call ...");
-			DEBUG('a', "\n Reading virtual address of filename");
-			// Lấy tham số tên tập tin từ thanh ghi r4
-			virtAddr = machine->ReadRegister(4);
-			DEBUG('a', "\n Reading filename.");
-			// MaxFileLength là = 32
-			filename = User2System(virtAddr, MaxFileLength + 1);
-			if (filename == NULL)
-			{
-				printf("\n Not enough memory in system");
-				DEBUG('a', "\n Not enough memory in system");
-				machine->WriteRegister(2, -1);
-				// trả về lỗi cho chương trình người dùng
-				delete filename;
-				return;
-			}
-			DEBUG('a', "\n Finish reading filename.");
-			//DEBUG('a',"\n File name : '"<<filename<<"'");
-			// Create file with size = 0
-			// Dùng đối tượng fileSystem của lớp OpenFile để tạo file,
-			// việc tạo file này là sử dụng các thủ tục tạo file của hệ điều
-			// hành Linux, chúng ta không quản ly trực tiếp các block trên
-			// đĩa cứng cấp phát cho file, việc quản ly các block của file
-			// trên ổ đĩa là một đồ án khác
-			if (!fileSystem->Create(filename, 0))
-			{
-				printf("\n Error create file '%s'", filename);
-				machine->WriteRegister(2, -1);
-				delete filename;
-				return;
-			}
-			machine->WriteRegister(2, 0);
-			// trả về cho chương trình người dùng thành công
-			delete filename;
-			break;
-		}
-		case SC_Scanf:
-		{
-			char *buf = new char[32];
-			if (buf == 0)
+			case SC_Halt:
+				DEBUG('a', "\n Shutdown, initiated by user program.");
+				printf("\n\n Shutdown, initiated by user program.");
+				interrupt->Halt();
 				break;
-			int bufAddrUser = machine->ReadRegister(4);
-			int length = machine->ReadRegister(5);
-			int sz = synchConsole->Read(buf, length);
-			System2User(bufAddrUser, sz, buf);
-			delete[] buf;
+			case SC_Print:
+			{
+				int virtAddr = machine->ReadRegister(4);
+				char *temp = new char[MaxLength];
+				//memset(temp, 0, MaxLength);
+				temp = User2System(virtAddr, MaxLength);
+				int i = 0;
+				while (temp[i] != 0)
+				{
+					synchConsole->Write(temp + i, 1);
+					i++;
+				}
+				temp[i] = '\n';
+				synchConsole->Write(temp + i, 1);
+				delete[] temp;
+				break;
+			}
+			case SC_Create:
+			{
+				int virtAddr;
+				char *filename;
+				DEBUG('a', "\n SC_Create call ...");
+				DEBUG('a', "\n Reading virtual address of filename");
+				// Lấy tham số tên tập tin từ thanh ghi r4
+				virtAddr = machine->ReadRegister(4);
+				DEBUG('a', "\n Reading filename.");
+				// MaxFileLength là = 32
+				filename = User2System(virtAddr, MaxFileLength + 1);
+				if (filename == NULL)
+				{
+					printf("\n Not enough memory in system");
+					DEBUG('a', "\n Not enough memory in system");
+					machine->WriteRegister(2, -1);
+					// trả về lỗi cho chương trình người dùng
+					delete filename;
+					return;
+				}
+				DEBUG('a', "\n Finish reading filename.");
+				//DEBUG('a',"\n File name : '"<<filename<<"'");
+				// Create file with size = 0
+				// Dùng đối tượng fileSystem của lớp OpenFile để tạo file,
+				// việc tạo file này là sử dụng các thủ tục tạo file của hệ điều
+				// hành Linux, chúng ta không quản ly trực tiếp các block trên
+				// đĩa cứng cấp phát cho file, việc quản ly các block của file
+				// trên ổ đĩa là một đồ án khác
+				if (!fileSystem->Create(filename, 0))
+				{
+					printf("\n Error create file '%s'", filename);
+					machine->WriteRegister(2, -1);
+					delete filename;
+					return;
+				}
+				machine->WriteRegister(2, 0);
+				// trả về cho chương trình người dùng thành công
+				delete filename;
+				break;
+			}
+			case SC_Scanf:
+			{
+				char *buf = new char[32];
+				if (buf == 0)
+					break;
+				int bufAddrUser = machine->ReadRegister(4);
+				int length = machine->ReadRegister(5);
+				int sz = synchConsole->Read(buf, length);
+				System2User(bufAddrUser, sz, buf);
+				delete[] buf;
+			}
+			default:
+				printf("\n Unexpected user mode exception (%d %d)", which, type);
+				interrupt->Halt();
 		}
-		default:
-			printf("\n Unexpected user mode exception (%d %d)", which, type);
-			interrupt->Halt();
-		}
-		inc_program_counter();
+		inc_program_counter(); // increase PC after each syscall
 	}
 }
