@@ -32,6 +32,8 @@
 
 #define SC_Print	11
 #define SC_Scanf	12
+#define SC_SeekFile 13
+#define SC_DeleteFile 14
 
 #ifndef IN_ASM
 
@@ -130,6 +132,12 @@ void Yield();
 void Printf(char *words);
 
 void Scanf(char *words, int length);
+
+OpenFileId openFile(char* name);
+
+int SeekFile(char* name,OpenFileId OF_id);
+
+int DeleteFile(char* name);
 
 #endif /* IN_ASM */
 
