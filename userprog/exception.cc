@@ -51,19 +51,19 @@
 //	are in machine.h.
 //----------------------------------------------------------------------
 
-void Increase_PC() // PrevPC = CurrPC; CurrPC = NextPC; NextPc + 4
+void Increase_PC() // PrevPC = CurrPC; CurrPC = NextPC; NextPC + 4bytes
 {
 	/* set previous programm counter (debugging only)
      * similar to: registers[PrevPCReg] = registers[PCReg];*/
-	machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
+	machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));  // PCReg: current Programm counter, then write this to the previous PC
 
 	/* set programm counter to next instruction
      * similar to: registers[PCReg] = registers[NextPCReg]*/
-	machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
+	machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg)); // get value of the next PC, then write it to the current PC
 
 	/* set next programm counter for brach execution
      * similar to: registers[NextPCReg] = pcAfter;*/
-	machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg) + 4);
+	machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg) + 4); // write the next 4 bytes to the next PC
 }
 
 void ExceptionHandler(ExceptionType which)
@@ -134,7 +134,7 @@ void ExceptionHandler(ExceptionType which)
 			printf("\n Unexpected user mode exception (%d %d)", which, type);
 			interrupt->Halt();
 		}
-		Increase_PC();
+		Increase_PC(); // Increase PC after each syscall
 		break;
 	}
 	case PageFaultException:
