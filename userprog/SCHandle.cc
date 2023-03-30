@@ -1,3 +1,4 @@
+#include "copyright.h"
 #include "SCHandle.h"
 
 char *User2System(int virtAddr, int limit)
