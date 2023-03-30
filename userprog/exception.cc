@@ -51,7 +51,7 @@
 //	are in machine.h.
 //----------------------------------------------------------------------
 
-void Increase_PC()
+void Increase_PC() // PrevPC = CurrPC; CurrPC = NextPC; NextPc + 4
 {
 	/* set previous programm counter (debugging only)
      * similar to: registers[PrevPCReg] = registers[PCReg];*/
