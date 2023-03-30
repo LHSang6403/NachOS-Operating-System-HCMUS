@@ -126,6 +126,22 @@ Scanf:
  j $31
  .end Scanf
 
+ .globl SeekFile
+ .ent SeekFile
+SeekFile:
+ addiu $2,$0,13
+ syscall
+ j $31
+ .end SeekFile
+
+ .globl DeleteFile
+ .ent DeleteFile
+DeleteFile:
+ addiu $2,$0,14
+ syscall
+ j $31
+ .end DeleteFile
+
 
         .globl __main
         .ent __main
