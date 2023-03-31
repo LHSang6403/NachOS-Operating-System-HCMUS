@@ -1,16 +1,23 @@
 #include "syscall.h"
 #include "copyright.h"
 #define maxlen 32
+#define MAX_LENGTH 255
 int main()
 {
-	int is = Create("123.txt");
-	if (is)
+	char filename[MAX_LENGTH];
+	int isCreate;
+	Printf("Input file name to create: ");
+	Scanf(filename, MAX_LENGTH);
+	isCreate = Create(filename);
+	if (isCreate)
 	{
-		Printf("Can not create file \'123.txt\'\n");
+		Printf("\nCan not create file ");
+		Printf(filename);
 	}
 	else
 	{
-		Printf("Successfully create file\n");
+		Printf("\nSuccessfully create file ");
+		Printf(filename);
 	}
 	Halt();
 	return 0;
