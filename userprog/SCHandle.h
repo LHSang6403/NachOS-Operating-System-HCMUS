@@ -175,7 +175,6 @@ public:
 
         if ((fileSystem->_openFile[fileSystem->pos] = fileSystem->Open(buf, type)) != NULL)
         {
-
             printf("\nOpen file success '%s'\n", buf);
             machine->WriteRegister(2, fileSystem->pos - 1);
         }
