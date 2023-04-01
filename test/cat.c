@@ -21,8 +21,8 @@ int main(int argc, char* argv[])
 		Printf("Can not open file ");
 		return 0;
 	}
-	filesz = SeekFile(-1, fileId);
-	i = SeekFile(0, fileId);
+	filesz = Seek(-1, fileId);
+	i = Seek(0, fileId);
 
 	while(i<filesz)
 	{	

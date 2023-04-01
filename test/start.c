@@ -74,13 +74,13 @@ Join:
 	j	$31
 	.end Join
 
-	.globl Create
-	.ent	Create
-Create:
+	.globl CreateFile
+	.ent	CreateFile
+CreateFile:
 	addiu $2,$0,SC_Create
 	syscall
 	j	$31
-	.end Create
+	.end CreateFile
 
 	.globl Open
 	.ent	Open
@@ -146,21 +146,21 @@ Scanf:
 	j	$31
 	.end Scanf
 
-	.globl SeekFile
-	.ent	SeekFile
-SeekFile:
+	.globl Seek
+	.ent	Seek
+Seek:
 	addiu $2,$0,SC_SeekFile
 	syscall
 	j	$31
-	.end SeekFile
+	.end Seek
 
-	.globl DeleteFile
-	.ent	DeleteFile
-DeleteFile:
+	.globl Delete
+	.ent	Delete
+Delete:
 	addiu $2,$0,SC_DeleteFile
 	syscall
 	j	$31
-	.end DeleteFile
+	.end Delete
 
 /* dummy function to keep gcc happy */
         .globl  __main

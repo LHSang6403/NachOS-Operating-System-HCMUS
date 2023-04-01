@@ -13,9 +13,9 @@ int main()
     //DeleteFile(name,IdFile);
     IdFile = Open(name);
     Printf("Opened file \n");
-    DeleteFile(name, IdFile);
+    Delete(name, IdFile);
     Close(IdFile);
-    DeleteFile(name, IdFile);
+    Delete(name, IdFile);
     Halt();
     return 0;
 }

@@ -8,7 +8,7 @@ int main()
 	int isCreate;
 	Printf("Input file name to create: ");
 	Scanf(filename, MAX_LENGTH);
-	isCreate = Create(filename);
+	isCreate = CreateFile(filename);
 	if (isCreate)
 	{
 		Printf("\nCan not create file ");

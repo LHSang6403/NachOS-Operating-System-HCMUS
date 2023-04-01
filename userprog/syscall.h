@@ -92,7 +92,7 @@ typedef int OpenFileId;
 #define ConsoleOutput	1  
  
 /* Create a Nachos file, with "name" */
-int Create(char *name);
+int CreateFile(char *name);
 
 /* Open the Nachos file "name", and return an "OpenFileId" that can 
  * be used to read and write to the file.
@@ -135,9 +135,9 @@ void Scanf(char *words, int length);
 
 OpenFileId openFile(char* name);
 
-int SeekFile(char* name,OpenFileId OF_id);
+int Seek(char* name,OpenFileId OF_id);
 
-int DeleteFile(char* name, OpenFileId id);
+int Delete(char* name, OpenFileId id);
 
 #endif /* IN_ASM */
 

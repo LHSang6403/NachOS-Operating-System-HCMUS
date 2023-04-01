@@ -47,7 +47,7 @@ int main()
         {
             Printf("\nPlease input a new file name: ");
             Scanf(destination, MAX_LENGTH);
-            Create(destination);
+            CreateFile(destination);
             dest = Open(destination);
         }
         else
@@ -57,8 +57,8 @@ int main()
         }
     }
 
-    filesize = SeekFile(-1, src);
-    SeekFile(0, src);
+    filesize = Seek(-1, src);
+    Seek(0, src);
 
     //Seek(0, destination);
     i = 0;
