@@ -157,7 +157,7 @@ public:
         }
 
         // Neu mo sdtin hay stdout, giu nguyen so luong file
-        buf = User2System(bufAddr, MaxFileLength + 1);
+        buf = User2System(bufAddr, MaxFileLength + 1); // copy the address of file's name from User to System
         if (strcmp(buf, "stdin") == 0)
         {
             printf("Stdin mode\n");
