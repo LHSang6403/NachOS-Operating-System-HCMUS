@@ -169,7 +169,7 @@ void ExceptionHandler(ExceptionType which)
 	}
 	case IllegalInstrException:
 	{
-		printf("\nUnimplemented or reserved instr\n");
+		printf("\nUnimplemented orlỗi  reserved instr\n");
 		ASSERT(FALSE);
 		break;
 	}
