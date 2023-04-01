@@ -137,7 +137,7 @@ OpenFileId openFile(char* name);
 
 int SeekFile(char* name,OpenFileId OF_id);
 
-int DeleteFile(char* name);
+int DeleteFile(char* name, OpenFileId id);
 
 #endif /* IN_ASM */
 

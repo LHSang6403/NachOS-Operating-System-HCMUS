@@ -5,17 +5,17 @@
 
 int main()
 {
+    OpenFileId IdFile;
     char name[MAX_LENGTH];
     int is;
     Printf("Input file name: ");
     Scanf(name, MAX_LENGTH);
-    DeleteFile(name);
-    is = Open("test.txt");
-    if (is)
-    {
-        Printf("Opened file test.txt\n");
-        DeleteFile("test.txt");
-    }
+    //DeleteFile(name,IdFile);
+    IdFile = Open(name);
+    Printf("Opened file \n");
+    DeleteFile(name, IdFile);
+    Close(IdFile);
+    DeleteFile(name, IdFile);
     Halt();
     return 0;
 }

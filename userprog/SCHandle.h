@@ -168,7 +168,7 @@ public:
         if (strcmp(buf, "stdout") == 0)
         {
             printf("Stdout mode\n");
-            machine->WriteRegister(2, 0);
+            machine->WriteRegister(2, 1);
             delete[] buf;
             return;
         }
@@ -200,10 +200,10 @@ public:
             return;
         }
 
-        // fileSystem->_openFile[no] == NULL;
+        fileSystem->_openFile[no] = NULL;
         delete fileSystem->_openFile[no]; // Dong file
         machine->WriteRegister(2, 0);     // Tra ve 0 neu thanh cong
-        printf("Close file success\n");
+        printf("\nClose file success\n");
     }
     void Syscall_ReadFile()
     {
@@ -344,10 +344,12 @@ public:
     {
         int virtAddr;
         char *filename;
+        int openf_id;
         DEBUG('a', "\n SC_DeleteFile call ...");
         DEBUG('a', "\n Reading virtual address of filename");
         // Lấy tham số tên tập tin từ thanh ghi r4
         virtAddr = machine->ReadRegister(4);
+        openf_id = machine->ReadRegister(5);
         DEBUG('a', "\n Reading filename.");
         // MaxFileLength là = 32
         filename = User2System(virtAddr, MaxFileLength + 1);
@@ -360,18 +362,36 @@ public:
             delete filename;
             return;
         }
-        DEBUG('a', "\n Finish reading filename.");
-        if (!fileSystem->Remove(filename))
+        // Kiem tra gioi han hop le
+        if (openf_id < 0 || openf_id > 10)
         {
-            printf("\n Error deleting file '%s'", filename);
             machine->WriteRegister(2, -1);
+            return;
+        }
+
+        // Neu file khong mo nhung tenfile ton tai
+        if (fileSystem->_openFile[openf_id] == NULL)
+        {
+            if (!fileSystem->Remove(filename))
+            {
+                printf("\n Error deleting file '%s'", filename);
+                machine->WriteRegister(2, -1);
+                delete filename;
+                return;
+            }
+            printf("\nDelete file '%s' successfully", filename);
+            machine->WriteRegister(2, 0);
             delete filename;
             return;
         }
-        machine->WriteRegister(2, 0);
-        printf("Delete file '%s' successfully", filename);
         // trả về cho chương trình người dùng thành công
-        delete filename;
+        else
+        {
+            printf("\n File '%s' is opening, can't be deleted", filename);
+            machine->WriteRegister(2, -1);
+            return;
+        }
+        return;
     }
 };
 
