@@ -61,7 +61,7 @@ public:
 						  // openfile[1]: stdout
 	FileSystem(bool format)
 	{
-		_openFile = new OpenFile *[10]; // cap phat bang file 10 o
+		_openFile = new OpenFile *[10];
 		pos = 0;
 		for (int i = 0; i < 10; i++)
 		{
@@ -73,7 +73,6 @@ public:
 		OpenFile *temp = this->Open("stdin", 0); // index = 1
 		_openFile[0] = temp;					 // index = 1
 		_openFile[0]->type = 1;
-		
 		temp = this->Open("stdout", 0);
 		_openFile[1] = temp; // index = 2
 		_openFile[1]->type = 0;

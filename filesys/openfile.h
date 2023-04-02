@@ -80,7 +80,8 @@ class FileHeader;
 
 class OpenFile {
   public:
-    int type;	// 0: readable and writeable, 1: read-only
+    int type;	// 0: readable, writeable,
+		// 1: read-only
     OpenFile(int sector);		// Open a file whose header is located
 					// at "sector" on the disk
     OpenFile(int sector, int mode);

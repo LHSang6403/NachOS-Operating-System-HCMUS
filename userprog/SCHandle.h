@@ -150,7 +150,7 @@ public:
     void Syscall_OpenFile()
     {
         int bufAddr = machine->ReadRegister(4);
-        int type = machine->ReadRegister(5);
+
         char *buf;
         // if already opened 10 files
         if (fileSystem->pos > 10)
@@ -177,7 +177,7 @@ public:
             return;
         }
 
-        if ((fileSystem->_openFile[fileSystem->pos] = fileSystem->Open(buf, type)) != NULL)
+        if ((fileSystem->_openFile[fileSystem->pos] = fileSystem->Open(buf)) != NULL)
         {
             printf("\nOpen file success '%s'\n", buf);
             machine->WriteRegister(2, fileSystem->pos - 1);
@@ -275,7 +275,7 @@ public:
         int openf_id = machine->ReadRegister(6);
         int i = fileSystem->pos;
 
-        if (openf_id > i || openf_id < 0 || openf_id == 0) // File vuot qua openf_id, khi id khong ton tai
+        if (openf_id > i || openf_id < 0 ) // File vuot qua openf_id, khi id khong ton tai
         {
             machine->WriteRegister(2, -1);
             return;
