@@ -275,7 +275,7 @@ public:
         int openf_id = machine->ReadRegister(6);
         int i = fileSystem->pos;
 
-        if (openf_id > i || openf_id < 0 ) // File vuot qua openf_id, khi id khong ton tai
+        if (openf_id > i || openf_id <= 0 ) // File vuot qua openf_id, khi id khong ton tai
         {
             machine->WriteRegister(2, -1);
             return;
