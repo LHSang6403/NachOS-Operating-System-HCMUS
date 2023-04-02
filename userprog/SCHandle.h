@@ -206,8 +206,8 @@ public:
     }
     void Syscall_ReadFile()
     {
-        int virtAddr = machine->ReadRegister(4);     // Lay dia chi cua tham so can doc tren thanh ghi
-        int BufferNumber = machine->ReadRegister(5); // Lay dia chi cua so luong byte can doc tren thanh ghi
+        int virtAddr = machine->ReadRegister(4);     // Lay dia chi cua tham so can doc tren thanh ghi 4
+        int BufferNumber = machine->ReadRegister(5); // Lay dia so luong byte can doc tren thanh ghi 5
         int openf_id = machine->ReadRegister(6);     // Lay dia chi cua OpenFileId cua file
 
         int m_pos = fileSystem->_openFile[openf_id]->GetCurrentPos(); // Lay vi tri hien tai cua file nay trong filesystem
@@ -226,13 +226,14 @@ public:
             return;
         }
 
-        char *buf = User2System(virtAddr, BufferNumber);
+        char *buf = User2System(virtAddr, BufferNumber); // copy chuỗi vùng nhớ từ User sang System với bộ đệm buffer dài charcount
 
-        if (openf_id == 0) // Doc tu stdin
+        if (openf_id == 0) // Doc tu stdin, ==0 do stdin ở đầu mảng
         {
-            int sz = synchConsole->Read(buf, BufferNumber);
+            // lấy chuỗi nhập từ bàn phím lưu vào trong buf
+            int sz = synchConsole->Read(buf, BufferNumber); // sz là số byte thực sự được đọc, được trả về từ hàm Read của synchConsole
             System2User(virtAddr, sz, buf);
-            machine->WriteRegister(2, sz);
+            machine->WriteRegister(2, sz); // ghi size đọc thực tế
 
             delete[] buf;
             return;
@@ -250,7 +251,7 @@ public:
         if ((fileSystem->_openFile[openf_id]->Read(buf, BufferNumber)) > 0) // Doc tung ky tu cua file
         {
             // copy data tu kernel sang user
-            int after = fileSystem->_openFile[openf_id]->GetCurrentPos(); // Lay vi tri
+            int after = fileSystem->_openFile[openf_id]->GetCurrentPos(); // Lay vi tri byte sau khi Read xong o đieu kien
             System2User(virtAddr, BufferNumber, buf);
             machine->WriteRegister(2, after - before + 1); // after & before duoc dung de
         }                                                  // Tra ve so byte thuc su
@@ -267,7 +268,7 @@ public:
         int openf_id = machine->ReadRegister(6);
         int i = fileSystem->pos;
 
-        if (openf_id > i || openf_id < 0 || openf_id == 0) // Khong ghi duoc vao file chi doc, file vuot qua openf_id, khi id khong ton tai
+        if (openf_id > i || openf_id < 0 || openf_id == 0) // File vuot qua openf_id, khi id khong ton tai, khong ghi duoc vao file chi doc
         {
             machine->WriteRegister(2, -1);
             return;
@@ -303,6 +304,7 @@ public:
             machine->WriteRegister(2, i - 1);
             delete[] buf;
         }
+
         int before = fileSystem->_openFile[openf_id]->GetCurrentPos();
         if ((fileSystem->_openFile[openf_id]->Write(buf, charcount)) != 0)
         {
@@ -333,7 +335,7 @@ public:
             return;
         }
 
-        if (pos == -1) // move file ptr to the begining of file
+        if (pos == -1) // move file ptr to the end of file
             pos = len;
 
         fileSystem->_openFile[openf_id]->Seek(pos);
@@ -346,10 +348,11 @@ public:
         int openf_id;
         DEBUG('a', "\n SC_DeleteFile call ...");
         DEBUG('a', "\n Reading virtual address of filename");
-        // Lấy tham số tên tập tin từ thanh ghi r4
+        // Lấy tham số tên tập tin và id từ thanh ghi r4, r5
         virtAddr = machine->ReadRegister(4);
         openf_id = machine->ReadRegister(5);
         DEBUG('a', "\n Reading filename.");
+
         // MaxFileLength là = 32
         filename = User2System(virtAddr, MaxFileLength + 1);
         if (filename == NULL)
@@ -368,7 +371,7 @@ public:
             return;
         }
 
-        // Neu file khong mo nhung tenfile ton tai
+        // Neu file khong mo nhung tenfile ton tai -> delete
         if (fileSystem->_openFile[openf_id] == NULL)
         {
             if (!fileSystem->Remove(filename))
