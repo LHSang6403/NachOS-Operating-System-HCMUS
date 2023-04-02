@@ -24,7 +24,7 @@ int main(int argc, char* argv[])
 	filesz = Seek(-1, fileId);
 	i = Seek(0, fileId);
 
-	while(i<filesz)
+	while(i < filesz)
 	{	
 		Read(c,1, fileId);
 		Printf(c);

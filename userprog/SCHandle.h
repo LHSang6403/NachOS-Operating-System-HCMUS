@@ -98,7 +98,7 @@ public:
 
         int bufAddrUser = machine->ReadRegister(4); // Lay tham so can in
         int length = machine->ReadRegister(5);      // Lay do dai cua tham so
-        //	Doc length cuar buffer vao I/O
+        //	Doc length cua buffer vao I/O
         //	Tra ve so byte doc duoc
         int sz = synchConsole->Read(buf, length);
         System2User(bufAddrUser, sz, buf);
@@ -386,7 +386,6 @@ public:
             delete filename;
             return;
         }
-        // trả về cho chương trình người dùng thành công
         else
         {
             printf("\n File '%s' is opening, can't be deleted", filename);
