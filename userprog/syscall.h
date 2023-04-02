@@ -135,7 +135,7 @@ void Scanf(char *words, int length);
 
 OpenFileId openFile(char* name);
 
-int Seek(char* name,OpenFileId OF_id);
+int Seek(int position,OpenFileId OF_id);
 
 int Delete(char* name, OpenFileId id);
 

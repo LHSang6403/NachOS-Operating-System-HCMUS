@@ -9,8 +9,10 @@
 int main()
 {
 	char *a;
-	Printf("Enter a string: \0");
+	Printf("Enter a string: ");
 	Scanf(a, MAX_LENGTH);
-	Printf(a);	
+	Printf("The input string: ");
+	Printf(a);
+	Halt();	
 	return 0;
 }

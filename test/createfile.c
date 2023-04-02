@@ -9,14 +9,14 @@ int main()
 	Printf("Input file name to create: ");
 	Scanf(filename, MAX_LENGTH);
 	isCreate = CreateFile(filename);
-	if (isCreate)
+	if (isCreate == 0) // tra ve 
 	{
-		Printf("\nCan not create file ");
+		Printf("\nSuccessfully create file ");
 		Printf(filename);
 	}
 	else
 	{
-		Printf("\nSuccessfully create file ");
+		Printf("\nCan't create file ");
 		Printf(filename);
 	}
 	Halt();

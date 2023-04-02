@@ -94,7 +94,7 @@ public:
     }
     void Syscall_Scan()
     {
-        char *buf = new char[MaxLength];
+        char *buf = new char[255];
 
         int bufAddrUser = machine->ReadRegister(4); // Lay tham so can in
         int length = machine->ReadRegister(5);      // Lay do dai cua tham so
@@ -114,7 +114,7 @@ public:
         virtAddr = machine->ReadRegister(4);
         DEBUG('a', "\n Reading filename.");
         // MaxFileLength là = 32
-        filename = User2System(virtAddr, MaxFileLength + 1); // filename ở system space
+        filename = User2System(virtAddr, MaxFileLength + 1);
         if (filename == NULL)
         {
             printf("\n Not enough memory in system");
@@ -129,8 +129,8 @@ public:
         // Create file with size = 0
         // Dùng đối tượng fileSystem của lớp OpenFile để tạo file,
         // việc tạo file này là sử dụng các thủ tục tạo file của hệ điều
-        // hành Linux, chúng ta không quản lý trực tiếp các block trên
-        // đĩa cứng cấp phát cho file, việc quản lý các block của file
+        // hành Linux, chúng ta không quản ly trực tiếp các block trên
+        // đĩa cứng cấp phát cho file, việc quản ly các block của file
         // trên ổ đĩa là một đồ án khác
         if (!fileSystem->Create(filename, 0))
         {
