@@ -75,6 +75,7 @@ public:
         printf("\n\n Shutdown, initiated by user program.");
         interrupt->Halt();
     }
+    
     void Syscall_Print()
     {
         int virtAddr = machine->ReadRegister(4); //tham so thu i trong ham
@@ -92,6 +93,7 @@ public:
         delete[] temp;
         return;
     }
+
     void Syscall_Scan()
     {
         char *buf = new char[MaxLength];
@@ -104,6 +106,7 @@ public:
         System2User(bufAddrUser, sz, buf);
         delete[] buf;
     }
+
     void Syscall_Create()
     {
         int virtAddr;
@@ -143,6 +146,7 @@ public:
         // trả về cho chương trình người dùng thành công
         delete filename;
     }
+
     void Syscall_OpenFile()
     {
         int bufAddr = machine->ReadRegister(4);
@@ -186,6 +190,7 @@ public:
         delete[] buf;
         return;
     }
+
     void Syscall_CloseFile()
     {
         int no = machine->ReadRegister(4);
@@ -204,6 +209,7 @@ public:
         machine->WriteRegister(2, 0);     // Tra ve 0 neu thanh cong
         printf("\nClose file success\n");
     }
+
     void Syscall_ReadFile()
     {
         int virtAddr = machine->ReadRegister(4);     // Lay dia chi cua tham so can doc tren thanh ghi 4
@@ -261,6 +267,7 @@ public:
         }
         delete[] buf;
     }
+
     void Syscall_WriteFile()
     {
         int virtAddr = machine->ReadRegister(4);
@@ -315,6 +322,7 @@ public:
             return;
         }
     }
+
     void Syscall_SeekFile()
     {
         int pos = machine->ReadRegister(4);
@@ -341,6 +349,7 @@ public:
         fileSystem->_openFile[openf_id]->Seek(pos);
         machine->WriteRegister(2, pos);
     }
+
     void Syscall_Delete()
     {
         int virtAddr;
