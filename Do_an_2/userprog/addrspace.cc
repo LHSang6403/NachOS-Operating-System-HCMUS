@@ -44,7 +44,7 @@ SwapHeader(NoffHeader *noffH)
     noffH->uninitData.virtualAddr = WordToHost(noffH->uninitData.virtualAddr);
     noffH->uninitData.inFileAddr = WordToHost(noffH->uninitData.inFileAddr);
 }
-BitMap *AddrSpace::bitmap = new BitMap(NumPhysPages);
+//BitMap *AddrSpace::bitmap = new BitMap(NumPhysPages);
 //----------------------------------------------------------------------
 // AddrSpace::AddrSpace
 // 	Create an address space to run a user program.
@@ -63,7 +63,7 @@ BitMap *AddrSpace::bitmap = new BitMap(NumPhysPages);
 AddrSpace::AddrSpace(OpenFile *executable)
 {
     NoffHeader noffH;
-    unsigned int i, size;
+    unsigned int size;
 
     executable->ReadAt((char *)&noffH, sizeof(noffH), 0);
     if ((noffH.noffMagic != NOFFMAGIC) &&
@@ -86,50 +86,99 @@ AddrSpace::AddrSpace(OpenFile *executable)
           numPages, size);
     // first, set up the translation
     pageTable = new TranslationEntry[numPages];
-    for (int i = 0; i < numPages; i++)
+    unsigned int i;
+    for (i = 0; i < numPages; i++)
     {
-        // int phyPage = machine->FindPage();
-        // while (phyPage == -1)
-        // {
-        //     phyPage = machine->FindPage();
-        // }
         pageTable[i].virtualPage = i;
-        pageTable[i].physicalPage = bitmap->Find();
+        pageTable[i].physicalPage = bitmapPhysPage->Find();
         pageTable[i].valid = TRUE;
         pageTable[i].use = FALSE;
         pageTable[i].dirty = FALSE;
         pageTable[i].readOnly = FALSE; // if the code segment was entirely on
-                                       // a separate page, we could set its
-                                       // pages to be read-only
+        // a separate page, we could set its
+        // pages to be read-only
+        bzero(&(machine->mainMemory[pageTable[i].physicalPage * PageSize]), PageSize);
     }
 
-    // zero out the entire address space, to zero the unitialized data segment
-    // and the stack segment
-   // bzero(machine->mainMemory, size);
-
-    // then, copy in the code and data segments into memory
     if (noffH.code.size > 0)
     {
-        DEBUG('a', "Initializing code segment, at 0x%x, size %d\n",
-              noffH.code.virtualAddr, noffH.code.size);
-        int DiaChiTruyCap = noffH.code.virtualAddr;
-        int ThuTuTrongBangTrang = DiaChiTruyCap / PageSize;
-        int Offset = DiaChiTruyCap % PageSize;
-        int ThuTuTrongTrangVatLy = pageTable[ThuTuTrongBangTrang].physicalPage;
-        int DiaChiVatLy = ThuTuTrongTrangVatLy * PageSize + Offset;
-        executable->ReadAt(&machine->mainMemory[DiaChiVatLy], noffH.code.size, noffH.code.inFileAddr);
+        for (int i = 0; i < numPages; i++)
+        {
+            executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr + pageTable[i].physicalPage * PageSize]), PageSize, noffH.code.inFileAddr + i * PageSize);
+        }
     }
+
     if (noffH.initData.size > 0)
     {
-        DEBUG('a', "Initializing data segment, at 0x%x, size %d\n",
-              noffH.initData.virtualAddr, noffH.initData.size);
-        int DiaChiTruyCap = noffH.initData.virtualAddr;
-        int ThuTuTrongBangTrang = DiaChiTruyCap / PageSize;
-        int Offset = DiaChiTruyCap % PageSize;
-        int ThuTuTrongTrangVatLy = pageTable[ThuTuTrongBangTrang].physicalPage;
-        int DiaChiVatLy = ThuTuTrongTrangVatLy * PageSize + Offset;
-        executable->ReadAt(&machine->mainMemory[DiaChiVatLy], noffH.initData.size, noffH.initData.inFileAddr);
+        for (int i = 0; i < numPages; i++)
+        {
+            executable->ReadAt(&(machine->mainMemory[noffH.initData.virtualAddr + pageTable[i].physicalPage * PageSize]), PageSize, noffH.initData.inFileAddr + i * PageSize);
+        }
     }
+    // numCodePage = divRoundUp(noffH.code.size, PageSize);
+    // // then, copy in the code and data segments into memory
+    // lastCodePageSize = noffH.code.size - (numCodePage - 1) * PageSize;
+    // tempDataSize = noffH.initData.size - (PageSize - lastCodePageSize);
+    // if (tempDataSize < 0)
+    // {
+    //     numDataPage = 0;
+    //     firstDataPageSize = noffH.initData.size;
+    // }
+    // else
+    // {
+    //     numDataPage = divRoundUp(tempDataSize, PageSize);
+    //     lastDataPageSize = tempDataSize - (numDataPage - 1) * PageSize;
+    //     firstDataPageSize = PageSize - lastCodePageSize;
+    // }
+
+    // for (i = 0; i < numCodePage; i++)
+    // {
+    //     if (noffH.code.size > 0)
+    //     {
+    //         executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr]) + pageTable[i].physicalPage * PageSize, i < (numCodePage - 1) ? PageSize : lastCodePageSize, noffH.code.inFileAddr + i * PageSize);
+    //     }
+    // }
+
+    // if (lastCodePageSize < PageSize)
+    // {
+    //     if (firstDataPageSize > 0)
+    //     {
+    //         executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr]) + (pageTable[i - 1].physicalPage * PageSize + lastCodePageSize), firstDataPageSize, noffH.initData.inFileAddr);
+    //     }
+    // }
+
+    // for (int j = 0; j < numDataPage; j++)
+    // {
+    //     if (noffH.initData.size > 0)
+    //     {
+    //         executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr]) + pageTable[i].physicalPage * PageSize, j < (numDataPage - 1) ? PageSize : lastDataPageSize, noffH.initData.inFileAddr + j * PageSize + firstDataPageSize);
+    //         i++;
+    //     }
+    // }
+    //     for()
+    //     if (noffH.code.size > 0)
+    //     {
+    //         DEBUG('a', "Initializing code segment, at 0x%x, size %d\n",
+    //               noffH.code.virtualAddr, noffH.code.size);
+    //         int DiaChiTruyCap = noffH.code.virtualAddr;
+    //         int ThuTuTrongBangTrang = DiaChiTruyCap / PageSize;
+    //         int Offset = DiaChiTruyCap % PageSize;
+    //         int ThuTuTrongTrangVatLy = pageTable[ThuTuTrongBangTrang].physicalPage;
+    //         int DiaChiVatLy = ThuTuTrongTrangVatLy * PageSize + Offset;
+    //         executable->ReadAt(&machine->mainMemory[DiaChiVatLy], noffH.code.size, noffH.code.inFileAddr);
+    //     }
+    //     if (noffH.initData.size > 0)
+    //     {
+    //         DEBUG('a', "Initializing data segment, at 0x%x, size %d\n",
+    //               noffH.initData.virtualAddr, noffH.initData.size);
+    //         int DiaChiTruyCap = noffH.initData.virtualAddr;
+    //         int ThuTuTrongBangTrang = DiaChiTruyCap / PageSize;
+    //         int Offset = DiaChiTruyCap % PageSize;
+    //         int ThuTuTrongTrangVatLy = pageTable[ThuTuTrongBangTrang].physicalPage;
+    //         int DiaChiVatLy = ThuTuTrongTrangVatLy * PageSize + Offset;
+    //         executable->ReadAt(&machine->mainMemory[DiaChiVatLy], noffH.initData.size, noffH.initData.inFileAddr);
+    //     }
+    // }
 }
 
 //----------------------------------------------------------------------
@@ -139,6 +188,10 @@ AddrSpace::AddrSpace(OpenFile *executable)
 
 AddrSpace::~AddrSpace()
 {
+    for (int i = 0; i < numPages; i++)
+    {
+        bitmapPhysPage->Clear(pageTable[i].physicalPage);
+    }
     delete pageTable;
 }
 

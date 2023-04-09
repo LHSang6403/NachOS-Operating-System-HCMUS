@@ -13,8 +13,8 @@
 #include "addrspace.h"
 // #include "progtest.h"
 
-#define MaxFileLength 32
-#define MaxLength 100000000
+#define MaxFileLength 255
+#define MaxLength 1023
 
 using namespace std;
 
@@ -70,19 +70,40 @@ int System2User(int virtAddr, int len, char *buffer)
     return i;
 }
 
-AddrSpace *space;
-
 void StartProcess(int _which)
 {
-    currentThread->space = space;
+    char *filename = User2System(_which, MaxLength + 1);
 
-    space->InitRegisters(); // set the initial register values
-    space->RestoreState();  // load page table register
+    if (filename == NULL)
+    {
+        DEBUG('a', "\n Not enough memory in system");
+        machine->WriteRegister(2, -1);
+        delete filename;
+        return;
+    }
+
+    OpenFile *executable = fileSystem->Open(filename);
+    AddrSpace *space;
+
+    if (executable == NULL)
+    {
+        DEBUG('a', "\n Unable to open file %s", filename);
+        machine->WriteRegister(2, -1);
+        delete filename;
+        return;
+    }
+    //space = new AddrSpace(executable);
+    //currentThread->space = space;
+
+    delete executable; // close file
+
+    currentThread->space->InitRegisters(); // set the initial register values
+    currentThread->space->RestoreState();  // load page table register
 
     machine->Run(); // jump to the user progam
     ASSERT(FALSE);  // machine->Run never returns;
-    // the address space exits
-    // by doing the syscall "exit"
+                    // the address space exits
+                    // by doing the syscall "exit"
 }
 
 class SC_Handle
@@ -430,8 +451,8 @@ public:
 
         if (ExecuteName == NULL)
         {
-            printf("\nNot enought memory in system");
-            DEBUG('a', "\nNot enought memory in system");
+            printf("\nNot enough memory in system");
+            DEBUG('a', "\nNot enough memory in system");
             machine->WriteRegister(2, -1);
             delete ExecuteName;
             return;
@@ -455,13 +476,13 @@ public:
             delete ExecuteName;
             return;
         }
-        space = new AddrSpace(execute);
+        AddrSpace* space = new AddrSpace(execute);
         delete execute;
 
-        int ProcessID = 0; // Process SpaceID
+       // int ProcessID = 0; // Process SpaceID
 
-        Thread *_Thread;
-        _Thread = new Thread(ExecuteName);
+        Thread *_Thread = new Thread(ExecuteName);
+        _Thread->space = space;
         if (_Thread == NULL)
         {
             printf("\nNew thread is unable to create");
@@ -469,10 +490,10 @@ public:
             return;
         }
 
-        _Thread->Fork(StartProcess, ProcessID);
+        _Thread->Fork(StartProcess, virtAddr);
 
-        ProcessID = space->getSpaceId();
-        machine->WriteRegister(2, ProcessID);
+        // ProcessID = space->getSpaceId();
+        machine->WriteRegister(2, _Thread->space->spaceId);
         return;
     }
 };

@@ -15,8 +15,7 @@
 
 #include "copyright.h"
 #include "filesys.h"
-#include "bitmap.h"
-#include "machine.h"
+
 
 #define UserStackSize 1024 // increase this as necessary!
 
@@ -33,16 +32,16 @@ public:
 
   void SaveState();    // Save/restore address space-specific
   void RestoreState(); // info on a context switch
-  int getSpaceId() { return spaceId; }
+  void PrintAddrState();
+
+  // int getSpaceId() { return spaceId; }
+  int spaceId;
 
 private:
   TranslationEntry *pageTable; // Assume linear page table translation
                                // for now!
   unsigned int numPages;       // Number of pages in the virtual
-                               // address space
-  static BitMap *bitmap;
-  static bool spaceIdMap[128];
-  int spaceId;
+
 };
 
 #endif // ADDRSPACE_H
