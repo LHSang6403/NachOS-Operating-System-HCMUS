@@ -90,104 +90,96 @@ AddrSpace::AddrSpace(OpenFile *executable)
     for (i = 0; i < numPages; i++)
     {
         pageTable[i].virtualPage = i;
-        pageTable[i].physicalPage = bitmapPhysPage->Find();
+        pageTable[i].physicalPage = bitmapPhysPage->Find(); // Su dung ham Find() de tim phan tu dau tien dang trong trong trang vat ly
         pageTable[i].valid = TRUE;
         pageTable[i].use = FALSE;
         pageTable[i].dirty = FALSE;
         pageTable[i].readOnly = FALSE; // if the code segment was entirely on
         // a separate page, we could set its
         // pages to be read-only
+
+        // zero out the entire address space, to zero the unitialized data segment
+        // and the stack segment
         bzero(&(machine->mainMemory[pageTable[i].physicalPage * PageSize]), PageSize);
     }
 
-    if (noffH.code.size > 0)
+    // then, copy in the code and data segments into memory
+
+    // Tính số trang cần thiết để lưu trữ mã máy và dữ liệu khởi tạo
+    numCodePage = divRoundUp(noffH.code.size, PageSize);
+    // Tính kích thước của trang cuối cùng lưu trữ mã máy
+    lastCodePageSize = noffH.code.size - (numCodePage - 1) * PageSize;
+    // Tính kích thước của trang đầu tiên lưu trữ dữ liệu khởi tạo (Tạm thời)
+    unsigned int tempSize = noffH.initData.size - (PageSize - lastCodePageSize);
+
+    // Nếu kích thước của dữ liệu khởi tạo không đủ để tạo một trang, không cần phải lưu trữ dữ liệu khởi tạo
+    if (tempSize < 0)
     {
-        for (int i = 0; i < numPages; i++)
+        numDataPage = 0;
+        firstDataPageSize = noffH.initData.size;
+    }
+    // Nếu đủ để tạo một trang, tính số trang cần thiết và kích thước của trang cuối cùng
+    else
+    {
+        // Tính lại kích thước của trang đầu tiên lưu trữ dữ liệu khởi tạo
+        numDataPage = divRoundUp(tempSize, PageSize);
+        lastDataPageSize = tempSize - (numDataPage - 1) * PageSize;
+        firstDataPageSize = PageSize - lastCodePageSize;
+    }
+
+    // Đọc CodePage và lưu vào bộ nhớ vật lý (Physical memory)
+    for (i = 0; i < numCodePage; i++)
+    {
+        // Đọc một trang CodePage từ tệp thực thi và lưu vào bộ nhớ vật lý tại địa chỉ ảo tương ứng
+        // Nếu là trang cuối cùng, sử dụng kích thước của trang cuối cùng đã tính toán trước đó
+        // Ngược lại, sử dụng kích thước của trang mặc định
+        if (noffH.code.size > 0)
         {
-            executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr + pageTable[i].physicalPage * PageSize]), PageSize, noffH.code.inFileAddr + i * PageSize);
+            executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr + pageTable[i].physicalPage * PageSize]), i < (numCodePage - 1) ? PageSize : lastCodePageSize, noffH.code.inFileAddr + i * PageSize);
         }
     }
 
-    if (noffH.initData.size > 0)
+    // Nếu kích thước của trang cuối cùng của CodePage nhỏ hơn kích thước trang mặc định,
+    // cần đọc dữ liệu khởi tạo và lưu vào trang đầu tiên lưu trữ dữ liệu khởi tạo (firstDataPageSize)
+    if (lastCodePageSize < PageSize)
     {
-        for (int i = 0; i < numPages; i++)
+        // Đọc dữ liệu khởi tạo từ tệp thực thi và lưu vào bộ nhớ vật lý
+        if (firstDataPageSize > 0)
         {
-            executable->ReadAt(&(machine->mainMemory[noffH.initData.virtualAddr + pageTable[i].physicalPage * PageSize]), PageSize, noffH.initData.inFileAddr + i * PageSize);
+            executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr + (pageTable[i - 1].physicalPage * PageSize + lastCodePageSize)]), firstDataPageSize, noffH.initData.inFileAddr);
         }
     }
-    // numCodePage = divRoundUp(noffH.code.size, PageSize);
-    // // then, copy in the code and data segments into memory
-    // lastCodePageSize = noffH.code.size - (numCodePage - 1) * PageSize;
-    // tempDataSize = noffH.initData.size - (PageSize - lastCodePageSize);
-    // if (tempDataSize < 0)
-    // {
-    //     numDataPage = 0;
-    //     firstDataPageSize = noffH.initData.size;
-    // }
-    // else
-    // {
-    //     numDataPage = divRoundUp(tempDataSize, PageSize);
-    //     lastDataPageSize = tempDataSize - (numDataPage - 1) * PageSize;
-    //     firstDataPageSize = PageSize - lastCodePageSize;
-    // }
 
-    // for (i = 0; i < numCodePage; i++)
-    // {
-    //     if (noffH.code.size > 0)
-    //     {
-    //         executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr]) + pageTable[i].physicalPage * PageSize, i < (numCodePage - 1) ? PageSize : lastCodePageSize, noffH.code.inFileAddr + i * PageSize);
-    //     }
-    // }
+    for (int j = 0; j < numDataPage; j++)
+    {
+        // Đọc một trang DataPage từ tệp thực thi và lưu vào bộ nhớ vật lý tại địa chỉ ảo tương ứng
+        // Nếu là trang cuối cùng, sử dụng kích thước của trang cuối cùng đã tính toán trước đó
+        // Ngược lại, sử dụng kích thước của trang mặc định
+        if (noffH.initData.size > 0)
+        {
+            executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr + pageTable[i].physicalPage * PageSize]), j < (numDataPage - 1) ? PageSize : lastDataPageSize, noffH.initData.inFileAddr + j * PageSize + firstDataPageSize);
+            i++;
+        }
+    }
 
-    // if (lastCodePageSize < PageSize)
-    // {
-    //     if (firstDataPageSize > 0)
-    //     {
-    //         executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr]) + (pageTable[i - 1].physicalPage * PageSize + lastCodePageSize), firstDataPageSize, noffH.initData.inFileAddr);
-    //     }
-    // }
+    // Khởi tạo ID cho Space ID
+    spaceId = InitializeSpaceID();
+}
 
-    // for (int j = 0; j < numDataPage; j++)
-    // {
-    //     if (noffH.initData.size > 0)
-    //     {
-    //         executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr]) + pageTable[i].physicalPage * PageSize, j < (numDataPage - 1) ? PageSize : lastDataPageSize, noffH.initData.inFileAddr + j * PageSize + firstDataPageSize);
-    //         i++;
-    //     }
-    // }
-    //     for()
-    //     if (noffH.code.size > 0)
-    //     {
-    //         DEBUG('a', "Initializing code segment, at 0x%x, size %d\n",
-    //               noffH.code.virtualAddr, noffH.code.size);
-    //         int DiaChiTruyCap = noffH.code.virtualAddr;
-    //         int ThuTuTrongBangTrang = DiaChiTruyCap / PageSize;
-    //         int Offset = DiaChiTruyCap % PageSize;
-    //         int ThuTuTrongTrangVatLy = pageTable[ThuTuTrongBangTrang].physicalPage;
-    //         int DiaChiVatLy = ThuTuTrongTrangVatLy * PageSize + Offset;
-    //         executable->ReadAt(&machine->mainMemory[DiaChiVatLy], noffH.code.size, noffH.code.inFileAddr);
-    //     }
-    //     if (noffH.initData.size > 0)
-    //     {
-    //         DEBUG('a', "Initializing data segment, at 0x%x, size %d\n",
-    //               noffH.initData.virtualAddr, noffH.initData.size);
-    //         int DiaChiTruyCap = noffH.initData.virtualAddr;
-    //         int ThuTuTrongBangTrang = DiaChiTruyCap / PageSize;
-    //         int Offset = DiaChiTruyCap % PageSize;
-    //         int ThuTuTrongTrangVatLy = pageTable[ThuTuTrongBangTrang].physicalPage;
-    //         int DiaChiVatLy = ThuTuTrongTrangVatLy * PageSize + Offset;
-    //         executable->ReadAt(&machine->mainMemory[DiaChiVatLy], noffH.initData.size, noffH.initData.inFileAddr);
-    //     }
-    // }
+unsigned int AddrSpace::InitializeSpaceID()
+{
+    return Random() % 10000;
 }
 
 //----------------------------------------------------------------------
-// AddrSpace::~AddrSpace
-// 	Dealloate an address space.  Nothing for now!
+// AddrSpace::InitializeSpaceID
+// 	Initializing space ID randomly 
 //----------------------------------------------------------------------
 
 AddrSpace::~AddrSpace()
 {
+    // Vòng lặp for được sử dụng để duyệt qua tất cả các trang được lưu trong pageTable
+    // Và giải phóng các trang này bằng cách xóa các bit tương ứng trên bitmapPhysPage
     for (int i = 0; i < numPages; i++)
     {
         bitmapPhysPage->Clear(pageTable[i].physicalPage);
