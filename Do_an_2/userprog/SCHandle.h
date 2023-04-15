@@ -479,6 +479,8 @@ public:
         AddrSpace* space = new AddrSpace(execute);
         delete execute;
 
+       // int ProcessID = 0; // Process SpaceID
+
         Thread *_Thread = new Thread(ExecuteName);
         _Thread->space = space;
         if (_Thread == NULL)
@@ -489,9 +491,10 @@ public:
         }
 
         _Thread->Fork(StartProcess, virtAddr);
-        
+
+        // ProcessID = space->getSpaceId();
         machine->WriteRegister(2, _Thread->space->spaceId);
-        //return;
+        return;
     }
 };
 

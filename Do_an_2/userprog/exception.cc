@@ -85,6 +85,10 @@ void ExceptionHandler(ExceptionType which)
 			A.Syscall_Halt();
 			break;
 		}
+		case SC_Exit:
+		{
+			break;
+		}
 		case SC_Print:
 		{
 			A.Syscall_Print();
