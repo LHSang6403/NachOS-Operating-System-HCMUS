@@ -11,7 +11,6 @@
 #include "machine.h"
 #include "utility.h"
 #include "addrspace.h"
-// #include "progtest.h"
 
 #define MaxFileLength 255
 #define MaxLength 1023

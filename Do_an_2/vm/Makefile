@@ -411,8 +411,7 @@ progtest.o: ../userprog/progtest.cc /usr/include/stdc-predef.h \
  ../filesys/directory.h ../filesys/filehdr.h ../threads/scheduler.h \
  ../threads/list.h ../machine/interrupt.h ../threads/list.h \
  ../machine/stats.h ../machine/timer.h ../threads/synchcons.h \
- ../machine/console.h ../userprog/addrspace.h ../threads/synch.h \
- ../userprog/progtest.h
+ ../machine/console.h ../userprog/addrspace.h ../threads/synch.h
 console.o: ../machine/console.cc /usr/include/stdc-predef.h \
  ../threads/copyright.h ../machine/console.h ../threads/utility.h \
  ../threads/copyright.h ../threads/bool.h ../machine/sysdep.h \

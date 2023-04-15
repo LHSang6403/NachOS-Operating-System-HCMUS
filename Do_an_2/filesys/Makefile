@@ -415,7 +415,7 @@ progtest.o: ../userprog/progtest.cc /usr/include/stdc-predef.h \
  ../threads/list.h ../machine/interrupt.h ../threads/list.h \
  ../machine/stats.h ../machine/timer.h ../threads/synchcons.h \
  ../machine/console.h ../filesys/synchdisk.h ../threads/synch.h \
- ../userprog/addrspace.h ../userprog/progtest.h
+ ../userprog/addrspace.h
 console.o: ../machine/console.cc /usr/include/stdc-predef.h \
  ../threads/copyright.h ../machine/console.h ../threads/utility.h \
  ../threads/copyright.h ../threads/bool.h ../machine/sysdep.h \
